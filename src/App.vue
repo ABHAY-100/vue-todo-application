@@ -1,3 +1,58 @@
+<script setup>
+import { onMounted, ref } from "vue";
+
+const tasksModel = ref({
+  tasks: [],
+  editing: null,
+});
+
+const createTask = (data, form$) => {
+  addToStorage(form$.data);
+  syncFromStorage();
+
+  form$.reset();
+  // form$.clear();
+};
+
+const addToStorage = (data) => {
+  let storageData = localStorage.getItem("tasks");
+  storageData = storageData ? JSON.parse(storageData) : [];
+
+  storageData.push(data);
+  localStorage.setItem("tasks", JSON.stringify(storageData));
+};
+
+const syncFromStorage = () => {
+  let tasks = localStorage.getItem("tasks");
+
+  tasksModel.value = {
+    tasks: tasks ? JSON.parse(tasks) : [],
+  };
+};
+
+const syncToStorage = () => {
+  localStorage.setItem("tasks", JSON.stringify(tasksModel.value.tasks));
+};
+
+const edit = (index) => {
+  tasksModel.value.editing = index;
+};
+
+const cancel = () => {
+  tasksModel.value.editing = null;
+  syncFromStorage();
+};
+
+const save = () => {
+  syncToStorage();
+  tasksModel.value.editing = null;
+};
+
+onMounted(() => {
+  syncFromStorage();
+});
+</script>
+
 <template>
   <div class="page">
     <div class="container">
@@ -122,70 +177,6 @@
     </div>
   </div>
 </template>
-
-<script setup>
-import { onMounted, ref } from "vue";
-
-// The model for the task list form
-const tasksModel = ref({
-  tasks: [], // list of tasks
-  editing: null, // current task we're editing
-});
-
-// Creating a task and saving it to localStorage
-const createTask = (data, form$) => {
-  addToStorage(form$.data); // first add to localStorage
-  syncFromStorage(); // then sync the `tasksModel` from localStorage
-
-  form$.reset(); // then reset the form
-  // form$.clear() // This is used to completely wipe the form instead of resetting
-};
-
-// Adds a new task to the localStorage
-const addToStorage = (data) => {
-  let storageData = localStorage.getItem("tasks");
-  storageData = storageData ? JSON.parse(storageData) : [];
-
-  storageData.push(data);
-  localStorage.setItem("tasks", JSON.stringify(storageData));
-};
-
-// Syncs the localStorage to `tasksModel`
-const syncFromStorage = () => {
-  let tasks = localStorage.getItem("tasks");
-
-  tasksModel.value = {
-    tasks: tasks ? JSON.parse(tasks) : [],
-  };
-};
-
-// Syncs the `tasksModel.tasks` to localStorage
-const syncToStorage = () => {
-  localStorage.setItem("tasks", JSON.stringify(tasksModel.value.tasks));
-};
-
-// Sets the tasks to edit
-const edit = (index) => {
-  tasksModel.value.editing = index;
-};
-
-// Cancels the task to editing
-const cancel = (index) => {
-  tasksModel.value.editing = null;
-  syncFromStorage();
-};
-
-// Saves the task
-const save = () => {
-  syncToStorage();
-  tasksModel.value.editing = null;
-};
-
-// Sync the `tasksModel` from localStorage upon pageload
-onMounted(() => {
-  syncFromStorage();
-});
-</script>
 
 <style lang="scss">
 .page {
