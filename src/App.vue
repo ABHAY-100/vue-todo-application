@@ -56,53 +56,60 @@ onMounted(() => {
 <template>
   <div class="page">
     <div class="container">
-      <h1>Tasks app</h1>
+      <h1>Vue To-Do List</h1>
 
-      <!-- Adding a task -->
       <Vueform size="lg" :endpoint="createTask">
-        <!-- Task input -->
+        <!-- the Vueform component will call 'createTask' when the form is submitted -->
+        
         <TextElement
           name="task"
           placeholder="Add a task"
           floating="Task name"
           rules="required"
         />
+        <!-- input field of name 'task' maps to 'tasks' in tasksModel internally -->
+        <!-- the input field -->
 
-        <!-- Task type -->
         <RadiogroupElement
           name="type"
           :items="['Personal', 'Business']"
           view="tabs"
           default="Personal"
         />
-
-        <!-- Submit -->
+        <!-- the radio group -->
+      
         <ButtonElement name="button" align="right" submits>
           Submit
         </ButtonElement>
+        <!-- the submit button -->
       </Vueform>
 
       <hr class="divider" />
+      <!-- the horizontal rule -->
 
-      <!-- Task list -->
       <Vueform v-model="tasksModel" sync>
-        <!-- `sync` to update the list when `tasksModel` changes -->
+      <!-- the sync prop will keep the form data and the `taskModel` in sync -->
 
-        <!-- List of tasks -->
         <ListElement
           name="tasks"
           :controls="{
-            add: false, // to disable adding new elements to the list
+            add: false,
           }"
           :add-class="{
-            handle: 'task-sort-handle', // for fixing top position of the handle
+            handle: 'task-sort-handle',
           }"
           sort
           @sort="syncToStorage"
           @remove="syncToStorage"
         >
+        <!-- the name 'tasks' binds form data to tasksmodel and syncs with local storage. list rendering handled internally by listelement. -->
+        <!-- adding is disabled but sort and remove are enabled -->
+        <!-- the add-class is used to add styling the the handle element, which is used for drag and drop -->
+        <!-- the event listener [@sort, @remove] will call 'syncToStorage' method when the list is sorted or an element is removed -->
+
           <template #default="{ index }">
-            <!-- Task wrapper -->
+          <!-- default slot for inserting custom content from parent. just like props but for content placement inside child components -->
+            
             <ObjectElement
               :name="index"
               :add-class="[
@@ -112,7 +119,9 @@ onMounted(() => {
                   : 'is-business',
               ]"
             >
-              <!-- Edit button, using the task name with index as label - only visible when not editing -->
+            <!-- used conditional rendereng for styling -->
+            <!-- name is the index of the task -->
+              
               <ButtonElement
                 :label="`#${index + 1} - ${tasksModel.tasks[index].task}`"
                 name="edit"
@@ -125,15 +134,17 @@ onMounted(() => {
               >
                 Edit
               </ButtonElement>
-
-              <!-- Task input when editing -->
+              <!-- label is the text inside the button -->
+              <!-- conditions are used to show/hide the button -->
+              <!-- on click the 'edit' method is called -->
+              
               <TextElement
                 name="task"
                 :conditions="[['editing', index]]"
                 :columns="6"
               />
-
-              <!-- Task type when editing -->
+              <!-- used to change the task name -->
+              
               <RadiogroupElement
                 name="type"
                 view="tabs"
@@ -144,8 +155,8 @@ onMounted(() => {
                   Business: 'B',
                 }"
               />
-
-              <!-- Cancel task editing -->
+              <!-- used to change the task type -->
+              
               <ButtonElement
                 name="cancel"
                 :conditions="[['editing', index]]"
@@ -156,8 +167,8 @@ onMounted(() => {
               >
                 Cancel
               </ButtonElement>
+              <!-- on click the 'cancel' method is called -->
 
-              <!-- Save task -->
               <ButtonElement
                 name="save"
                 :conditions="[['editing', index]]"
@@ -167,12 +178,14 @@ onMounted(() => {
               >
                 Save
               </ButtonElement>
+              <!-- on click the 'save' method is called -->
+
             </ObjectElement>
           </template>
         </ListElement>
-
-        <!-- Store which field we're editing so that conditions can rely on this -->
+        
         <HiddenElement name="editing" />
+        <!-- used to store the index of the task being edited -->
       </Vueform>
     </div>
   </div>
